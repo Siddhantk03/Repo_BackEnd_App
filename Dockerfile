@@ -2,14 +2,17 @@
 FROM eclipse-temurin:21-jdk-alpine AS builder
 WORKDIR /workspace
 
+# Install bash and utilities for cross-platform wrapper compatibility
+RUN apk add --no-cache bash
+
 # Copy maven wrapper and pom.xml
 COPY .mvn/ .mvn
 COPY mvnw pom.xml ./
 
-# Download dependencies offline
-RUN ./mvnw dependency:go-offline -B
+# Convert Windows CRLF line endings and grant execute permissions
+RUN sed -i 's/\r$//' mvnw && chmod +x mvnw
 
-# Copy source code and package
+# Copy source code and package application
 COPY src ./src
 RUN ./mvnw clean package -DskipTests
 
